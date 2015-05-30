@@ -1,6 +1,6 @@
 ﻿namespace Chatter.Shared
 {
-    public class ServiceMessages
+    public class ServerMessages
     {
         public class SignInSuccess
         { }

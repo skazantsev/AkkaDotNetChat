@@ -14,7 +14,7 @@ namespace Chatter.Client
         {
             ChatActorSystem = ActorSystem.Create("ChatActorSystem");
             var chatActor = ChatActorSystem.ActorOf(Props.Create(() => new ChatClientActor()), "chatClient");
-            var stubServiceActor = ChatActorSystem.ActorOf(Props.Create(() => new StubChatServiceActor()), "chatService");
+            var chatServerActor = ChatActorSystem.ActorOf(Props.Create(() => new StubChatServerActor()), "chatServer");
 
             Chat = new ChatClient(chatActor);
             Chat.SignIn("Sergey");
@@ -25,21 +25,21 @@ namespace Chatter.Client
             Console.ReadLine();
         }
 
-        public class StubChatServiceActor : ReceiveActor
+        public class StubChatServerActor : ReceiveActor
         {
-            public StubChatServiceActor()
+            public StubChatServerActor()
             {
                 Receive<ClientMessages.SignIn>(x =>
                 {
-                    Sender.Tell(new ServiceMessages.SignInSuccess());
-                    Context.ActorSelection("/user/chatClient").Tell(new ServiceMessages.NewUserConnected(x.Login));
+                    Sender.Tell(new ServerMessages.SignInSuccess());
+                    Context.ActorSelection("/user/chatClient").Tell(new ServerMessages.NewUserConnected(x.Login));
                 });
 
-                Receive<ClientMessages.SignOut>(x => Sender.Tell(new ServiceMessages.SignOutSuccess()));
+                Receive<ClientMessages.SignOut>(x => Sender.Tell(new ServerMessages.SignOutSuccess()));
 
                 Receive<ClientMessages.SendMessage>(x =>
                 {
-                    Context.ActorSelection("/user/chatClient").Tell(new ServiceMessages.NewMessage(x.Login, x.Message));
+                    Context.ActorSelection("/user/chatClient").Tell(new ServerMessages.NewMessage(x.Login, x.Message));
                 });
             }
         }

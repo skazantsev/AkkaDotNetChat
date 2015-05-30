@@ -21,13 +21,13 @@ namespace Chatter.Client
 
         public void Authenticating()
         {
-            Receive<ServiceMessages.SignInSuccess>(x =>
+            Receive<ServerMessages.SignInSuccess>(x =>
             {
                 BecomeAuthenticated();
                 UserNotifier.SignInSuccess();
             });
 
-            Receive<ServiceMessages.SignInFailure>(x =>
+            Receive<ServerMessages.SignInFailure>(x =>
             {
                 BecomeUnauthenticated();
                 UserNotifier.SignInFailure();
@@ -44,20 +44,20 @@ namespace Chatter.Client
 
             Receive<ClientMessages.SendMessage>(x => DispatchToChatService(x));
 
-            Receive<ServiceMessages.NewUserConnected>(x => UserNotifier.NewUserConnected(x.User));
+            Receive<ServerMessages.NewUserConnected>(x => UserNotifier.NewUserConnected(x.User));
 
-            Receive<ServiceMessages.NewMessage>(x => UserNotifier.NewMessage(x.User, x.Message));
+            Receive<ServerMessages.NewMessage>(x => UserNotifier.NewMessage(x.User, x.Message));
         }
 
         public void Unauthenticating()
         {
-            Receive<ServiceMessages.SignOutSuccess>(x =>
+            Receive<ServerMessages.SignOutSuccess>(x =>
             {
                 BecomeUnauthenticated();
                 UserNotifier.SignOutSuccess();
             });
 
-            Receive<ServiceMessages.SignOutFailure>(x =>
+            Receive<ServerMessages.SignOutFailure>(x =>
             {
                 BecomeAuthenticated();
                 UserNotifier.SignOutFailure();
@@ -66,7 +66,7 @@ namespace Chatter.Client
 
         private static void DispatchToChatService<T>(T obj)
         {
-            Context.ActorSelection("/user/chatService").Tell(obj);
+            Context.ActorSelection("/user/chatServer").Tell(obj);
         }
 
         private void BecomeUnauthenticated()
