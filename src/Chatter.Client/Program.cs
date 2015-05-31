@@ -7,37 +7,28 @@ namespace Chatter.Client
     {
         public static ActorSystem ActorSystem;
 
-        public static ChatClient ChatClient;
-
         public static void Main(string[] args)
         {
             ActorSystem = ActorSystem.Create("ChatClientSystem");
             var chatClientActor = ActorSystem.ActorOf<ChatClientActor>(string.Format("chatClient_{0}", Guid.NewGuid()));
-            ChatClient = new ChatClient(chatClientActor);
+            var chatClient = new ChatClient(chatClientActor);
 
-            Console.Write(">>>Enter your name:");
+            Console.Write("[SYS_MSG] Enter your name:");
             string userName;
             while (true)
             {
                 userName = Console.ReadLine();
                 if (string.IsNullOrEmpty(userName))
-                    Console.WriteLine("User name can't be empty.");
+                    Console.WriteLine("[SYS_MSG] User name can't be empty.");
                 else
                     break;
             }
 
-            ChatClient.SignIn(userName);
+            chatClient.SignIn(userName);
 
             while (true)
             {
-                try
-                {
-                    ChatClient.Send(Console.ReadLine());
-                }
-                catch (InvalidOperationException)
-                {
-                    Console.WriteLine(">>>not authenticated");
-                }
+                chatClient.Send(Console.ReadLine());
             }
         }
     }

@@ -25,14 +25,13 @@ namespace Chatter.Client
             Receive<ServerMessages.SignInSuccess>(x =>
             {
                 BecomeAuthenticated();
-                Program.ChatClient.IsAuthenticated = true;
-                Console.WriteLine(">>>Successfull sign in");
+                Console.WriteLine("[SYS_MSG] Successfull sign in");
             });
 
             Receive<ServerMessages.SignInFailure>(x =>
             {
                 BecomeUnauthenticated();
-                Console.WriteLine(">>>Oops, try it later.");
+                Console.WriteLine("[SYS_MSG] Oops, try it later.");
             });
         }
 
@@ -56,14 +55,13 @@ namespace Chatter.Client
             Receive<ServerMessages.SignOutSuccess>(x =>
             {
                 BecomeUnauthenticated();
-                Program.ChatClient.IsAuthenticated = false;
-                Console.Write(">>>Enter your name:");
+                Console.Write("[SYS_MSG] Enter your name:");
             });
 
             Receive<ServerMessages.SignOutFailure>(x =>
             {
                 BecomeAuthenticated();
-                Console.WriteLine(">>>Oops, try it later.");
+                Console.WriteLine("[SYS_MSG] Oops, try it later.");
             });
         }
 
