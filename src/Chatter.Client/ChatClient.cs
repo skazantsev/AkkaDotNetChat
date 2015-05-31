@@ -10,9 +10,9 @@ namespace Chatter.Client
 
         private IActorRef _chatActor;
 
-        public ChatClient(Func<string, IActorRef> chatActorBuilde)
+        public ChatClient(Func<string, IActorRef> chatActorBuilder)
         {
-            _chatActorBuilder = chatActorBuilde;
+            _chatActorBuilder = chatActorBuilder;
         }
 
         public string Login { get; private set; }
