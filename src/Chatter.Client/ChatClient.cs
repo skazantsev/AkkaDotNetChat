@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using Akka.Actor;
 using Chatter.Shared;
 
@@ -7,11 +6,13 @@ namespace Chatter.Client
 {
     public class ChatClient
     {
-        private readonly IActorRef _chatActor;
+        private readonly Func<string, IActorRef> _chatActorBuilder;
 
-        public ChatClient(IActorRef chatActor)
+        private IActorRef _chatActor;
+
+        public ChatClient(Func<string, IActorRef> chatActorBuilde)
         {
-            _chatActor = chatActor;
+            _chatActorBuilder = chatActorBuilde;
         }
 
         public string Login { get; private set; }
@@ -27,6 +28,7 @@ namespace Chatter.Client
                 throw new ArgumentNullException("login");
 
             Login = login;
+            _chatActor = _chatActorBuilder(Login);
             _chatActor.Tell(new ClientMessages.SignIn(Login));
         }
 

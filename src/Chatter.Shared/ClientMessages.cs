@@ -6,7 +6,8 @@
         {
             public SignIn(string login)
             {
-                Login = login;}
+                Login = login;
+            }
 
             public string Login { get; private set; }
         }

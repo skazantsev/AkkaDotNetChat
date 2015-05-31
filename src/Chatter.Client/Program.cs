@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System.Collections.Generic;
+using Akka.Actor;
 using Chatter.Shared;
 using System;
 using System.Threading;
@@ -7,40 +8,65 @@ namespace Chatter.Client
 {
     public class Program
     {
-        public static ActorSystem ChatActorSystem;
-        public static ChatClient Chat;
+        public static ActorSystem ActorSystem;
 
         public static void Main(string[] args)
         {
-            ChatActorSystem = ActorSystem.Create("ChatActorSystem");
-            var chatActor = ChatActorSystem.ActorOf(Props.Create(() => new ChatClientActor()), "chatClient");
-            var chatServerActor = ChatActorSystem.ActorOf(Props.Create(() => new StubChatServerActor()), "chatServer");
+            ActorSystem = ActorSystem.Create("ChatClientSystem");
+            ActorSystem.ActorOf(Props.Create(() => new StubChatServerActor()), "chatServer");
 
-            Chat = new ChatClient(chatActor);
-            Chat.SignIn("Sergey");
+            var chatClient1 = new ChatClient(CreateActor);
+            chatClient1.SignIn("Sergey");
+
+            var chatClient2 = new ChatClient(CreateActor);
+            chatClient2.SignIn("Mike");
 
             Thread.Sleep(500);
-            Chat.Send("Hello!");
+            chatClient1.Send("Hello!");
+
+            chatClient2.Send("Hi!");
 
             Console.ReadLine();
         }
 
+        private static IActorRef CreateActor(string login)
+        {
+            var actorName = string.Format("chatClient_{0}", login);
+            return ActorSystem.ActorOf<ChatClientActor>(actorName);
+        }
+
         public class StubChatServerActor : ReceiveActor
         {
+            // TODO: Move sessions outside actor
+            private readonly Dictionary<string, IActorRef> _userSessions;
+
             public StubChatServerActor()
             {
+                _userSessions = new Dictionary<string, IActorRef>();
+
                 Receive<ClientMessages.SignIn>(x =>
                 {
                     Sender.Tell(new ServerMessages.SignInSuccess());
-                    Context.ActorSelection("/user/chatClient").Tell(new ServerMessages.NewUserConnected(x.Login));
+                    _userSessions.Add(x.Login, Sender);
+                    BroadcastToAll(new ServerMessages.NewUserConnected(x.Login));
                 });
 
-                Receive<ClientMessages.SignOut>(x => Sender.Tell(new ServerMessages.SignOutSuccess()));
-
-                Receive<ClientMessages.SendMessage>(x =>
+                Receive<ClientMessages.SignOut>(x =>
                 {
-                    Context.ActorSelection("/user/chatClient").Tell(new ServerMessages.NewMessage(x.Login, x.Message));
+                    _userSessions.Remove(x.Login);
+                    Sender.Tell(new ServerMessages.SignOutSuccess());
                 });
+
+                Receive<ClientMessages.SendMessage>(x => BroadcastToAll(new ServerMessages.NewMessage(x.Login, x.Message)));
+            }
+
+            // TODO: Do not tell sender (sender should print a message immediately)
+            private void BroadcastToAll<T>(T message)
+            {
+                foreach (var session in _userSessions.Values)
+                {
+                    session.Tell(message);
+                }
             }
         }
     }
