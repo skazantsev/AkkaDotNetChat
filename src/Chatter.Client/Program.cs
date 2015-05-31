@@ -1,6 +1,5 @@
 ﻿using Akka.Actor;
 using System;
-using System.Threading;
 
 namespace Chatter.Client
 {
@@ -8,30 +7,38 @@ namespace Chatter.Client
     {
         public static ActorSystem ActorSystem;
 
+        public static ChatClient ChatClient;
+
         public static void Main(string[] args)
         {
             ActorSystem = ActorSystem.Create("ChatClientSystem");
+            var chatClientActor = ActorSystem.ActorOf<ChatClientActor>(string.Format("chatClient_{0}", Guid.NewGuid()));
+            ChatClient = new ChatClient(chatClientActor);
 
-            Thread.Sleep(2000);
+            Console.Write(">>>Enter your name:");
+            string userName;
+            while (true)
+            {
+                userName = Console.ReadLine();
+                if (string.IsNullOrEmpty(userName))
+                    Console.WriteLine("User name can't be empty.");
+                else
+                    break;
+            }
 
-            var chatClient1 = new ChatClient(CreateActor);
-            chatClient1.SignIn("Sergey");
+            ChatClient.SignIn(userName);
 
-            var chatClient2 = new ChatClient(CreateActor);
-            chatClient2.SignIn("Mike");
-
-            Thread.Sleep(2000);
-            chatClient1.Send("Hello!");
-
-            chatClient2.Send("Hi!");
-
-            Console.ReadLine();
-        }
-
-        private static IActorRef CreateActor(string login)
-        {
-            var actorName = string.Format("chatClient_{0}", login);
-            return ActorSystem.ActorOf<ChatClientActor>(actorName);
+            while (true)
+            {
+                try
+                {
+                    ChatClient.Send(Console.ReadLine());
+                }
+                catch (InvalidOperationException)
+                {
+                    Console.WriteLine(">>>not authenticated");
+                }
+            }
         }
     }
 }

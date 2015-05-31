@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using Chatter.Shared;
 
 namespace Chatter.Client
@@ -24,13 +25,14 @@ namespace Chatter.Client
             Receive<ServerMessages.SignInSuccess>(x =>
             {
                 BecomeAuthenticated();
-                UserNotifier.SignInSuccess();
+                Program.ChatClient.IsAuthenticated = true;
+                Console.WriteLine(">>>Successfull sign in");
             });
 
             Receive<ServerMessages.SignInFailure>(x =>
             {
                 BecomeUnauthenticated();
-                UserNotifier.SignInFailure();
+                Console.WriteLine(">>>Oops, try it later.");
             });
         }
 
@@ -44,9 +46,9 @@ namespace Chatter.Client
 
             Receive<ClientMessages.SendMessage>(x => DispatchToChatService(x));
 
-            Receive<ServerMessages.NewUserConnected>(x => UserNotifier.NewUserConnected(x.User));
+            Receive<ServerMessages.NewUserConnected>(x => Console.WriteLine("{0} joined the chat", x.User));
 
-            Receive<ServerMessages.NewMessage>(x => UserNotifier.NewMessage(x.User, x.Message));
+            Receive<ServerMessages.NewMessage>(x => Console.WriteLine("{0}: {1}", x.User, x.Message));
         }
 
         public void Unauthenticating()
@@ -54,13 +56,14 @@ namespace Chatter.Client
             Receive<ServerMessages.SignOutSuccess>(x =>
             {
                 BecomeUnauthenticated();
-                UserNotifier.SignOutSuccess();
+                Program.ChatClient.IsAuthenticated = false;
+                Console.Write(">>>Enter your name:");
             });
 
             Receive<ServerMessages.SignOutFailure>(x =>
             {
                 BecomeAuthenticated();
-                UserNotifier.SignOutFailure();
+                Console.WriteLine(">>>Oops, try it later.");
             });
         }
 

@@ -6,21 +6,16 @@ namespace Chatter.Client
 {
     public class ChatClient
     {
-        private readonly Func<string, IActorRef> _chatActorBuilder;
+        private readonly IActorRef _chatActor;
 
-        private IActorRef _chatActor;
-
-        public ChatClient(Func<string, IActorRef> chatActorBuilder)
+        public ChatClient(IActorRef chatActor)
         {
-            _chatActorBuilder = chatActorBuilder;
+            _chatActor = chatActor;
         }
 
         public string Login { get; private set; }
 
-        public bool IsAuthenticated
-        {
-            get { return !string.IsNullOrEmpty(Login); }
-        }
+        public bool IsAuthenticated { get; set; }
 
         public void SignIn(string login)
         {
@@ -28,7 +23,6 @@ namespace Chatter.Client
                 throw new ArgumentNullException("login");
 
             Login = login;
-            _chatActor = _chatActorBuilder(Login);
             _chatActor.Tell(new ClientMessages.SignIn(Login));
         }
 
