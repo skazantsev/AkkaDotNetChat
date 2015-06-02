@@ -26,6 +26,7 @@ namespace Chatter.Client
             {
                 BecomeAuthenticated();
                 Console.WriteLine("[SYS_MSG] Successfull sign in");
+                DispatchToChatService(new ClientMessages.GetChatLog(x.User));
             });
 
             Receive<ServerMessages.SignInFailure>(x =>
@@ -47,7 +48,15 @@ namespace Chatter.Client
 
             Receive<ServerMessages.NewUserConnected>(x => Console.WriteLine("{0} joined the chat", x.User));
 
-            Receive<ServerMessages.NewMessage>(x => Console.WriteLine("{0}: {1}", x.User, x.Message));
+            Receive<ServerMessages.NewMessage>(x => Console.WriteLine(x.Message));
+
+            Receive<ServerMessages.MessageLog>(x =>
+            {
+                foreach (var message in x.Log)
+                {
+                    Console.WriteLine(message);
+                }
+            });
         }
 
         public void Unauthenticating()

@@ -29,10 +29,5 @@ namespace Chatter.Client
         {
             _chatActor.Tell(new ClientMessages.SendMessage(Login, message));
         }
-
-        public void GetLog()
-        {
-            _chatActor.Tell(new ClientMessages.GetChatLog(Login));
-        }
     }
 }
