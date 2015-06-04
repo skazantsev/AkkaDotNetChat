@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Chatter.Shared;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Chatter.Server
 {
@@ -9,7 +9,7 @@ namespace Chatter.Server
     {
         private static readonly Dictionary<string, IActorRef> UserSessions = new Dictionary<string, IActorRef>();
 
-        private static readonly Stack<ChatMessage> Log = new Stack<ChatMessage>();
+        private static LinkedList<ChatMessage> _log = new LinkedList<ChatMessage>();
 
         public ChatServerActor()
         {
@@ -29,13 +29,15 @@ namespace Chatter.Server
             Receive<ClientMessages.SendMessage>(x =>
             {
                 var chatMsg = new ChatMessage(x.Login, x.Message);
-                Log.Push(chatMsg);
+                _log.AddFirst(chatMsg);
+                if (_log.Count > 100)
+                    _log = new LinkedList<ChatMessage>(_log.Take(10));
                 BroadcastToAll(new ServerMessages.NewMessage(chatMsg));
             });
 
             Receive<ClientMessages.GetChatLog>(x =>
             {
-                var lastMessages = Log.Take(10).ToList();
+                var lastMessages = _log.Take(10).Reverse().ToList();
                 Sender.Tell(new ServerMessages.MessageLog(lastMessages));
             });
         }
