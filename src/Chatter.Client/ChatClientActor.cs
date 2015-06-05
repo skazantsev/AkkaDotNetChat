@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Akka.Actor;
 using Chatter.Shared;
 
@@ -76,7 +77,7 @@ namespace Chatter.Client
 
         private static void DispatchToChatService<T>(T obj)
         {
-            Context.ActorSelection("akka.tcp://ChatServerSystem@localhost:9500/user/chatServer").Tell(obj);
+            Context.ActorSelection(ConfigurationManager.AppSettings["ChatServerActorPath"]).Tell(obj);
         }
 
         private void BecomeUnauthenticated()
