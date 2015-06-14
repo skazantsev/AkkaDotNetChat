@@ -47,9 +47,21 @@ namespace Chatter.Client
 
             Receive<ClientMessages.SendMessage>(x => DispatchToChatService(x));
 
-            Receive<ServerMessages.NewUserConnected>(x => Console.WriteLine("{0} joined the chat", x.User));
+            Receive<ServerMessages.NewUserConnected>(x =>
+            {
+                Console.ForegroundColor = (ConsoleColor) x.Color;
+                Console.Write(x.User);
+                Console.ResetColor();
+                Console.WriteLine(" joined the chat");
+            });
 
-            Receive<ServerMessages.NewMessage>(x => Console.WriteLine(x.Message));
+            Receive<ServerMessages.NewMessage>(x =>
+            {
+                Console.ForegroundColor = (ConsoleColor)x.Message.Color;
+                Console.Write(x.Message.From);
+                Console.ResetColor();
+                Console.WriteLine(" " + x.Message.Text);
+            });
 
             Receive<ServerMessages.MessageLog>(x =>
             {

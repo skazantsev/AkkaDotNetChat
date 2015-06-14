@@ -25,12 +25,15 @@ namespace Chatter.Shared
 
         public class NewUserConnected
         {
-            public NewUserConnected(string user)
+            public NewUserConnected(string user, int color)
             {
                 User = user;
+                Color = color;
             }
 
             public string User { get; private set; }
+
+            public int Color { get; private set; }
         }
 
         public class NewMessage

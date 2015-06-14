@@ -2,19 +2,17 @@
 {
     public class ChatMessage
     {
-        public ChatMessage(string from, string text)
+        public ChatMessage(string from, string text, int color)
         {
             From = from;
             Text = text;
+            Color = color;
         }
 
         public string From { get; private set; }
 
         public string Text { get; private set; }
 
-        public override string ToString()
-        {
-            return string.Format("{0}: {1}", From, Text);
-        }
+        public int Color { get; private set; }
     }
 }

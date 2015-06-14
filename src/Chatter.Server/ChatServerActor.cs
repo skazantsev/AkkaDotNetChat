@@ -17,7 +17,7 @@ namespace Chatter.Server
             {
                 UserSessions.Add(x.Login, Sender);
                 Sender.Tell(new ServerMessages.SignInSuccess(x.Login));
-                BroadcastToAll(new ServerMessages.NewUserConnected(x.Login));
+                BroadcastToAll(new ServerMessages.NewUserConnected(x.Login, x.Color));
             });
 
             Receive<ClientMessages.SignOut>(x =>
@@ -28,7 +28,7 @@ namespace Chatter.Server
 
             Receive<ClientMessages.SendMessage>(x =>
             {
-                var chatMsg = new ChatMessage(x.Login, x.Message);
+                var chatMsg = new ChatMessage(x.Login, x.Message, x.Color);
                 _log.AddFirst(chatMsg);
                 if (_log.Count > 100)
                     _log = new LinkedList<ChatMessage>(_log.Take(10));
